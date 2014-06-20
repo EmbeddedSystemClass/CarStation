@@ -1,0 +1,142 @@
+/*
+ * This file is subject to the terms of the GFX License. If a copy of
+ * the license was not distributed with this file, you can obtain one at:
+ *
+ *              http://ugfx.org/license.html
+ */
+
+/**
+ * @file    drivers/gdisp/SSD1306/board_SSD1306_spi.h
+ * @brief   GDISP Graphic Driver subsystem board interface for the SSD1306 display.
+ */
+
+#ifndef _GDISP_LLD_BOARD_H
+#define _GDISP_LLD_BOARD_H
+
+// The command byte to put on the front of each page line
+//#define SSD1306_PAGE_PREFIX		0x40			 		// Co = 0, D/C = 1
+
+// For a multiple display configuration we would put all this in a structure and then
+//	set g->board to that structure.
+#define SSD1306_RESET_PORT		GPIOA
+#define SSD1306_RESET_PIN		6
+// #define SSD1306_MISO_PORT		GPIOB
+// #define SSD1306_MISO_PIN		8
+#define SSD1306_MOSI_PORT		GPIOA
+#define SSD1306_MOSI_PIN		7
+#define SSD1306_SCK_PORT		GPIOA
+#define SSD1306_SCK_PIN			5
+//#define SSD1306_CS_PORT			GPIOB
+//#define SSD1306_CS_PIN			5
+#define SSD1306_DC_PORT			GPIOA
+#define SSD1306_DC_PIN			4
+
+#define SET_RST					palClearPad(SSD1306_RESET_PORT, SSD1306_RESET_PIN);
+#define CLR_RST					palSetPad(SSD1306_RESET_PORT, SSD1306_RESET_PIN);
+
+#define DATA_DC					palSetPad(SSD1306_DC_PORT, SSD1306_DC_PIN);
+#define COMMAND_DC				palClearPad(SSD1306_DC_PORT, SSD1306_DC_PIN);
+
+/*
+ * SPI1 configuration structure.
+ * Speed 42MHz, CPHA=0, CPOL=0, 8bits frames, MSb transmitted first.
+ * The slave select line is the pin 4 on the port GPIOA.
+ */
+static const SPIConfig spi1config = {
+	NULL,
+	/* HW dependent part.*/
+	GPIOD,			// Can't use SPI cs  用一个无效的GPIO，因为SPI驱动一定要一个CS引脚，如果用0，会异常
+	16,
+	SPI_CR1_CPOL | SPI_CR1_CPHA	| SPI_CR1_SPE | SPI_CR1_MSTR | SPI_CR1_BR_2 | SPI_CR1_BR_1
+};
+
+#if GFX_USE_OS_CHIBIOS
+	static int32_t thdPriority = 0;
+#endif
+
+static inline void init_board(GDisplay *g) {
+
+	// As we are not using multiple displays we set g->board to NULL as we don't use it.
+	g->board = 0;
+
+
+	switch(g->controllerdisplay) {
+	case 0:											// Set up for Display 0
+//		// RESET pin.
+//		palSetPadMode(SSD1306_RESET_PORT, SSD1306_RESET_PIN, PAL_MODE_OUTPUT_PUSHPULL);
+//
+//		// 等修改为STM32F系列，原有的GPIO是L系列的。
+//		palSetPadMode(SSD1306_MISO_PORT, SSD1306_MISO_PIN, 	PAL_MODE_ALTERNATE(1)|
+//															PAL_STM32_OSPEED_HIGHEST);
+//		palSetPadMode(SSD1306_MOSI_PORT, SSD1306_MOSI_PIN, 	PAL_MODE_ALTERNATE(1)|
+//															PAL_STM32_OSPEED_HIGHEST);
+//		palSetPadMode(SSD1306_SCK_PORT,  SSD1306_SCK_PIN,  	PAL_MODE_ALTERNATE(1)|
+//															PAL_STM32_OSPEED_HIGHEST);
+//		palSetPad(SSD1306_CS_PORT, SSD1306_CS_PIN);
+//		palSetPadMode(SSD1306_CS_PORT,   SSD1306_CS_PIN,   	PAL_MODE_ALTERNATE(1)|
+//															PAL_STM32_OSPEED_HIGHEST);
+		spiInit();
+		spiStart(&SPID1, &spi1config);
+		break;
+	}
+}
+
+static inline void post_init_board(GDisplay *g) {
+	(void) g;
+}
+
+static inline void setpin_reset(GDisplay *g, bool_t state) {
+	(void) g;
+	if(state)
+		SET_RST
+	else
+		CLR_RST
+}
+
+static inline void acquire_bus(GDisplay *g) {
+	(void) g;
+	#if GFX_USE_OS_CHIBIOS
+		thdPriority = (int32_t)chThdGetPriority();
+		chThdSetPriority(HIGHPRIO);
+	#endif
+	spiAcquireBus(&SPID1);
+}
+
+static inline void release_bus(GDisplay *g) {
+	(void) g;
+	#if GFX_USE_OS_CHIBIOS
+		chThdSetPriority(thdPriority);
+	#endif
+	spiReleaseBus(&SPID1);
+}
+
+static inline void write_cmd(GDisplay *g, uint8_t cmd) {
+	(void)	g;
+
+	//command[0] = 0x00;		// Co = 0, D/C = 0
+	//command[1] = cmd;
+
+	COMMAND_DC
+
+	//spiStart(&SPID1, &spi1config);
+	//spiSelect(&SPID1);
+	spiSend(&SPID1, 1, &cmd);
+	//spiUnselect(&SPID1);
+	//spiStop(&SPID1);
+}
+
+static inline void write_data(GDisplay *g, uint8_t* data, uint16_t length) {
+	(void) g;
+
+	DATA_DC
+
+	//spiStart(&SPID1, &spi1config);
+	//spiSelect(&SPID1);
+	spiSend(&SPID1, length, data);
+	//spiUnselect(&SPID1);
+	//spiStop(&SPID1);
+}
+
+
+#endif /* _GDISP_LLD_BOARD_H */
+
