@@ -30,6 +30,12 @@
 #define GPIO_LED_GREEN_BIT			7
 #define GPIO_LED_GREEN_PORT			GPIOC
 
+#define GPIO_GPS_BIT				1
+#define GPIO_GPS_PORT				GPIOA
+
+#define GPIO_BLUETOOTH_BIT			8
+#define GPIO_BLUETOOTH_PORT			GPIOA
+
 
 /*
  * Board identifier.
@@ -92,32 +98,52 @@
  * PA11- Reserve
  * PA12- Reserve
  */
-#define VAL_GPIOACRL            0xB3B34434      /*  PA7...PA0 */
-#define VAL_GPIOACRH            0x44444443      /* PA15...PA8 */
+#define VAL_GPIOACRL            0xB3B38B34      /*  PA7...PA0 */
+#define VAL_GPIOACRH            0x444448B3      /* PA15...PA8 */
 #define VAL_GPIOAODR            0xFFFFFEFD		 /* GPS Disable,Bluetooth Disable*/
 
 /*
  * Port B setup.
  * Everything input except:
+ * PB0 - 左边按键（蓝色引线）（input）
+ * PB1 - 右边按键（绿色引线）（input）
+ * PB6 - I2C1 SCL
+ * PB7 - I2C1 SDA
+ * PB10- I2C2 SCL
+ * PB11- I2C2 SDA
+ * PB8 - 充满指示LED（input）
+ * PB14- 蓝牙配对LED（input）
  */
-#define VAL_GPIOBCRL            0x44444444      /*  PB7...PB0 */
-#define VAL_GPIOBCRH            0x44444444      /* PB15...PB8 */
+#define VAL_GPIOBCRL            0xFF444444      /*  PB7...PB0 */
+#define VAL_GPIOBCRH            0x4444FF44      /* PB15...PB8 */
 #define VAL_GPIOBODR            0xFFFFFFFF
 
 /*
  * Port C setup.
  * Everything input except:
+ * PC0 - ADC1-10 12v汽车电池（直通）
+ * PC1 - ADC1-11 4.7v锂电池
+ * PC2 - ADC1-12 12v电门（汽车钥匙在ON位置后才有电）
+ * PC3 - 门灯信号（开门 低压？）（暂时使用输入，如果信号不能为低电平，则需要使用AD转换方式检测）
+ * PC4 - 电源变换模块12-5 enable(output)
+ * PC5 - LED(Internal)(output）
+ * PC6 - LED(Red)（output）
+ * PC7 - LED(Green)（output）
+ * PC8 - SDC(CK)
+ * PC9 - SDC(D0)
+ * PC10- SDC(D1)
+ * PC11- SDC(D2)
+ * PC12- SDC(D3)
  */
-#define VAL_GPIOCCRL            0x33344444      /*  PC7...PC0 */
-#define VAL_GPIOCCRH            0x44444444      /* PC15...PC8 */
+#define VAL_GPIOCCRL            0x33334000      /*  PC7...PC0 */
+#define VAL_GPIOCCRH            0x444BBBBB      /* PC15...PC8 */
 #define VAL_GPIOCODR            0xFFFFFFFF
 
 /*
  * Port D setup.
  * Everything input except:
- * PD5 - LED(Internal)
- * PD6 - LED(Red)
- * PD7 - LED(Green)
+ * PD2 - SDC(CMD)
+
  */
 #define VAL_GPIODCRL            0x44444444      /*  PD7...PD0 */
 #define VAL_GPIODCRH            0x44444444      /* PD15...PD8 */

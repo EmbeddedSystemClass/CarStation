@@ -55,3 +55,24 @@ void boardInit(void) {
    */
   AFIO->MAPR |= AFIO_MAPR_USART2_REMAP;
 }
+
+#if HAL_USE_SDC || defined(__DOXYGEN__)
+/**
+ * @brief   SDC card detection.
+ */
+bool_t sdc_lld_is_card_inserted(SDCDriver *sdcp) {
+  (void)sdcp;
+
+  return TRUE;
+}
+
+/**
+ * @brief   SDC card write protection detection.
+ */
+bool_t sdc_lld_is_write_protected(SDCDriver *sdcp) {
+  (void)sdcp;
+
+  return FALSE;
+}
+#endif /* HAL_USE_SDC */
+

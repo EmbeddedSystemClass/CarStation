@@ -17,6 +17,8 @@
 #include "ch.h"
 #include "hal.h"
 #include "gfx.h"
+#include <shell.h>
+
 //#include "test.h"
 
 /*
@@ -37,6 +39,20 @@ static msg_t Thread1(void *arg) {
   return 0;
 }
 
+static const ShellCommand commands[] = {
+//  {"mem", cmd_mem},
+//  {"threads", cmd_threads},
+//  {"test", cmd_test},
+//  {"tree", cmd_tree},
+  {NULL, NULL}
+};
+static const ShellConfig shell_cfg1 = {
+  (BaseSequentialStream *)&SD1,
+  commands
+};
+#define SHELL_WA_SIZE   THD_WA_SIZE(512)
+
+
 /*
  * Application entry point.
  */
@@ -44,6 +60,9 @@ int main(void) {
 	font_t		font;
 	GHandle GW1, GW2, GW3;
 	int			i;
+
+	SerialConfig	SDConfig;
+	Thread *shelltp = NULL;
 
   /*
    * System initializations.
@@ -59,9 +78,20 @@ int main(void) {
   palSetPad(GPIO_LED_INTERNAL_PORT, GPIO_LED_INTERNAL_BIT);
 
   /*
-   * Activates the serial driver 2 using the driver default configuration.
+   * Activates the serial driver 1 using the driver default configuration.
    */
-  sdStart(&SD2, NULL);
+  sdStart(&SD1, NULL);
+
+  // 开启蓝牙
+  palSetPad(GPIO_BLUETOOTH_PORT, GPIO_BLUETOOTH_BIT);
+
+  /*
+   * Shell manager initialization.
+   */
+  shellInit();
+
+  // 创建Shell线程
+  shelltp = shellCreate(&shell_cfg1, SHELL_WA_SIZE, NORMALPRIO);
 
   /*
    * Creates the blinker thread.
