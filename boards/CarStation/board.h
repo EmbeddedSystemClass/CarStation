@@ -145,7 +145,7 @@
  * PD2 - SDC(CMD)
 
  */
-#define VAL_GPIODCRL            0x44444444      /*  PD7...PD0 */
+#define VAL_GPIODCRL            0x44444B44      /*  PD7...PD0 */
 #define VAL_GPIODCRH            0x44444444      /* PD15...PD8 */
 #define VAL_GPIODODR            0xFFFFFFFF
 

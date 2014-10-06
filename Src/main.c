@@ -17,7 +17,10 @@
 #include "ch.h"
 #include "hal.h"
 #include "gfx.h"
-#include <shell.h>
+
+#include "SDCard/SDCard.h"
+#include "GPS/GPS.h"
+#include "shell/car_sh.h"
 
 //#include "test.h"
 
@@ -39,18 +42,6 @@ static msg_t Thread1(void *arg) {
   return 0;
 }
 
-static const ShellCommand commands[] = {
-//  {"mem", cmd_mem},
-//  {"threads", cmd_threads},
-//  {"test", cmd_test},
-//  {"tree", cmd_tree},
-  {NULL, NULL}
-};
-static const ShellConfig shell_cfg1 = {
-  (BaseSequentialStream *)&SD1,
-  commands
-};
-#define SHELL_WA_SIZE   THD_WA_SIZE(512)
 
 
 /*
@@ -60,9 +51,6 @@ int main(void) {
 	font_t		font;
 	GHandle GW1, GW2, GW3;
 	int			i;
-
-	SerialConfig	SDConfig;
-	Thread *shelltp = NULL;
 
   /*
    * System initializations.
@@ -74,30 +62,25 @@ int main(void) {
   halInit();
   chSysInit();
 
+  // 初始化SD Card和mount文件系统
+  InitSDCard();
+
+  // 初始化Shell
+  InitShell();
+  EnableBluetooth(true);
+
   palClearPad(GPIO_LED_INTERNAL_PORT, GPIO_LED_INTERNAL_BIT);
   palSetPad(GPIO_LED_INTERNAL_PORT, GPIO_LED_INTERNAL_BIT);
-
-  /*
-   * Activates the serial driver 1 using the driver default configuration.
-   */
-  sdStart(&SD1, NULL);
-
-  // 开启蓝牙
-  palSetPad(GPIO_BLUETOOTH_PORT, GPIO_BLUETOOTH_BIT);
-
-  /*
-   * Shell manager initialization.
-   */
-  shellInit();
-
-  // 创建Shell线程
-  shelltp = shellCreate(&shell_cfg1, SHELL_WA_SIZE, NORMALPRIO);
 
   /*
    * Creates the blinker thread.
    */
   chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
 
+  // 初始化GPS模块
+  InitGPS();
+
+  // 初始化电源监控部分
 
   // 测试gfx
   gfxInit();
