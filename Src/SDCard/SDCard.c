@@ -67,24 +67,24 @@ void cmd_diskfree(BaseSequentialStream *chp, int argc, char *argv[])
 			clusters, (uint32_t)SDC_FS.csize, freebytes);
 }
 
-void cmd_mkfs(BaseSequentialStream *chp, int argc, char *argv[])
-{
-	(void)argv;
-	(void)argc;
-
-	FRESULT		err;
-
-	err = f_mkfs(0, 0, 0);
-
-	if (err != FR_OK)
-	{
-		chprintf(chp, "f_mkfs failed, error:%d.\r\n", err);
-	}
-	else
-	{
-		chprintf(chp, "f_mkfs successfully.\r\n");
-	}
-}
+//void cmd_mkfs(BaseSequentialStream *chp, int argc, char *argv[])
+//{
+//	(void)argv;
+//	(void)argc;
+//
+//	FRESULT		err;
+//
+//	err = f_mkfs(0, 0, 0);
+//
+//	if (err != FR_OK)
+//	{
+//		chprintf(chp, "f_mkfs failed, error:%d.\r\n", err);
+//	}
+//	else
+//	{
+//		chprintf(chp, "f_mkfs successfully.\r\n");
+//	}
+//}
 
 void cmd_sdinfo(BaseSequentialStream *chp, int argc, char *argv[])
 {
@@ -99,5 +99,57 @@ void cmd_sdinfo(BaseSequentialStream *chp, int argc, char *argv[])
 	else
 	{
 		chprintf(chp, "sdcGetInfo failed.\r\n");
+	}
+}
+
+void cmd_dir(BaseSequentialStream *chp, int argc, char *argv[])
+{
+	DIR		dir;
+	char*	path;
+	FRESULT	err;
+	FILINFO fno;
+
+	if (argc > 0)
+	{
+		path = argv[0];
+	}
+	else
+	{
+		path = "\0";
+	}
+
+	err = f_opendir(&dir, path);
+
+	if (err == FR_OK)
+	{
+		while (true)
+		{
+			err = f_readdir(&dir, &fno);
+
+			if ( (err != FR_OK) || (fno.fname[0] == 0) )
+			{
+				break;
+			}
+
+			if ( fno.fname[0] == '.')
+			{
+				continue;
+			}
+
+			if (fno.fattrib & AM_DIR)
+			{
+				// 目录
+				chprintf(chp, "[%s]\r\n", fno.fname);
+			}
+			else
+			{
+				// 文件
+				chprintf(chp, "%s\r\n", fno.fname);;
+			}
+		}
+	}
+	else
+	{
+		chprintf(chp, "f_opendir failed, error=%d.\r\n", err);
 	}
 }

@@ -36,6 +36,12 @@
 #define GPIO_BLUETOOTH_BIT			8
 #define GPIO_BLUETOOTH_PORT			GPIOA
 
+// 12v-5v DC模块 Enable引脚（用于控制锂电池充电模块，因为锂电池充电模块的CS端一旦禁用后，再启用无法使得充电模块再次工作）
+#define GPIO_DCDC_ENABLE_BIT		4
+#define GPIO_DCDC_ENABLE_PORT		GPIOC
+
+#define GPIO_CHARGE_FULL_BIT		8
+#define GPIO_CHARGE_FULL_PORT		GPIOB
 
 /*
  * Board identifier.

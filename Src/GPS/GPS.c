@@ -6,7 +6,7 @@
  *      Author: daniel
  */
 
-
+#include <hal.h>
 #include "GPS.h"
 
 bool_t InitGPS(void)
@@ -19,6 +19,14 @@ bool_t InitGPS(void)
 }
 void EnableGPS(bool_t bEnable)
 {
-
+	if (bEnable)
+	{
+		// 开启GPS模块
+		palSetPad(GPIO_GPS_PORT, GPIO_GPS_BIT);
+	}
+	else
+	{
+		palClearPad(GPIO_GPS_PORT, GPIO_GPS_BIT);
+	}
 }
 

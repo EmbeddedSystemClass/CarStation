@@ -10,14 +10,16 @@
 #include "car_sh.h"
 
 #include "../SDCard/SDCard.h"
+#include "../power/power.h"
 
 // 自定义命令入口
 static const ShellCommand commands[] = {
 	{"diskfree", cmd_diskfree},
-	{"mkfs", cmd_mkfs},
+//	{"mkfs", cmd_mkfs},
 	{"sdinfo", cmd_sdinfo},
-//  {"tree", cmd_tree},
-  {NULL, NULL}
+	{"dir", cmd_dir},
+	{"power", cmd_power},
+	{NULL, NULL}
 };
 
 static const ShellConfig shell_cfg1 = {
