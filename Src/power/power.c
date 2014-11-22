@@ -5,8 +5,10 @@
  *      Author: daniel
  */
 
+#include "power.h"
 #include <hal.h>
 #include <chprintf.h>
+#include "Msg/Msg.h"
 
 #define ADC_GRP1_NUM_CHANNELS   1
 #define ADC_GRP1_BUF_DEPTH      8
@@ -39,9 +41,12 @@ void EnableCharge(bool_t bEnable)
 // ADC error callback
 static void adcerrorcallback(ADCDriver *adcp, adcerror_t err)
 {
+	(void)adcp;
+	(void)err;
 
-  (void)adcp;
-  (void)err;
+	// TODO:测试
+	//Msg		msg;
+
 }
 
 
@@ -60,7 +65,7 @@ static const ADCConversionGroup adcgrpcfg1 = {
   0,                            /* SMPR2 */
   ADC_SQR1_NUM_CH(ADC_GRP1_NUM_CHANNELS),
   0,                            /* SQR2 */
-  ADC_SQR3_SQ1_N(ADC_CHANNEL_IN10)
+  ADC_SQR3_SQ1_N(ADC_CHANNEL_IN11)
 };
 
 void cmd_power(BaseSequentialStream *chp, int argc, char *argv[])

@@ -11,6 +11,9 @@
 
 #include "../SDCard/SDCard.h"
 #include "../power/power.h"
+#include "../LED/led.h"
+#include "../GPS/GPs.h"
+#include "../I2C/myi2c.h"
 
 // 自定义命令入口
 static const ShellCommand commands[] = {
@@ -19,6 +22,10 @@ static const ShellCommand commands[] = {
 	{"sdinfo", cmd_sdinfo},
 	{"dir", cmd_dir},
 	{"power", cmd_power},
+	{"chargeenable", cmd_chargeenable},
+	{"led", cmd_led},
+	{"gpsenable", cmd_gpsenable},
+	{"light", cmd_light},
 	{NULL, NULL}
 };
 
