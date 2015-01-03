@@ -50,10 +50,7 @@ void __early_init(void) {
  */
 void boardInit(void) {
 
-  /*
-   * Remap USART2 to the PD5/PD6 pins.
-   */
-  AFIO->MAPR |= AFIO_MAPR_USART2_REMAP;
+
 }
 
 #if HAL_USE_SDC || defined(__DOXYGEN__)

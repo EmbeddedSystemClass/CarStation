@@ -9,13 +9,18 @@
 
 static void clock_load(const struSize* size, void* param)
 {
+	// TODO:测试代码
+	gdispSetClip(size->x, size->y, size->cx, size->cy);
+
+	gdispDrawBox(0, 0, size->cx, size->cy, 1);
+	//gdispDrawLine(0, 0, size->cx, size->cy, 1);
 }
 
 static void clock_unload(void)
 {
 }
 
-static void clock_msg(void)
+static void clock_msg(msg_t msg)
 {
 }
 

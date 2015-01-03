@@ -11,6 +11,8 @@
 #include <ch.h>
 #include <gfx.h>
 
+#include "Msg/Msg.h"
+
 // 按键事件
 typedef enum
 {
@@ -39,7 +41,7 @@ typedef struct
 // GUI block的各个入口函数
 typedef void (*LoadFunc_t)(const struSize* size, void* param);	//param：用于初始化相同块的不同风格（可能有字体不同，大小不同，显示的信息页可能不同）
 typedef void (*UnloadFunc_t)(void);
-typedef void (*MsgFunc_t)(void);
+typedef void (*MsgFunc_t)(msg_t msg);
 
 typedef enumAction (*ButtonFunc_t)(enumButtonPress button);
 
@@ -55,6 +57,7 @@ typedef struct
 {
 	const struSize				size;
 	const struBlockFunctions*	entry;
+	void*						param;		// Load使用的参数，用于指定block是以什么形式显示
 } struBlock;
 
 // 页面编号
@@ -83,7 +86,34 @@ typedef struct
 	const int8_t		rightlongaction;
 } struPage;
 
+typedef union
+{
+	struct		struSH21Data
+	{
+		struSize	size;
+		int			nTemperature;
+		int			nHumidity;
+	}	SH21Data;
+} guiMem;
+
+extern MemoryPool		guiMP;
+
+// GUI内存分配宏
+#define GUI_NEW			chPoolAlloc(&guiMP)
+#define GUI_NEW_I		chPoolAllocI(&guiMP)
+
+#define GUI_FREE(p)		chPoolFree(&guiMP, p)
+#define GUI_FREE_I(p)	chPoolFreeI(&guiMP, p)
+
 bool_t InitGUI(void);
+
+void LoadFirstPage(enumPage name);
+void LoadPage(const struPage* page);
+void UnloadPage(const struPage* page);
+void SendMsgToPage(msg_t msg);
+
+
+// 发送消息到GUI Mailbox
 
 
 

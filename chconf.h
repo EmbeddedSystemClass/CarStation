@@ -337,7 +337,7 @@
  * @note    Requires @p CH_USE_HEAP and/or @p CH_USE_MEMPOOLS.
  */
 #if !defined(CH_USE_DYNAMIC) || defined(__DOXYGEN__)
-#define CH_USE_DYNAMIC                  TRUE
+#define CH_USE_DYNAMIC                  FALSE
 #endif
 
 /** @} */
@@ -430,7 +430,7 @@
  *          some test cases into the test suite.
  */
 #if !defined(CH_DBG_THREADS_PROFILING) || defined(__DOXYGEN__)
-#define CH_DBG_THREADS_PROFILING        TRUE
+#define CH_DBG_THREADS_PROFILING        FALSE
 #endif
 
 /** @} */

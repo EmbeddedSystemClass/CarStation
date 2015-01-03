@@ -92,6 +92,7 @@ CSRC = $(PORTSRC) \
        $(CHIBIOS)/os/various/shell.c \
        $(CHIBIOS)/os/various/chprintf.c \
        $(CHIBIOS)/os/various/chrtclib.c \
+       $(CHIBIOS)/os/various/memstreams.c \
        $(CARSTATIONSRC)
 #       ./Src/main.c
 #       $(CHIBIOS)/os/various/evtimer.c \
@@ -129,7 +130,8 @@ INCDIR = $(PORTINC) $(KERNINC) \
          $(HALINC) $(PLATFORMINC) $(BOARDINC) \
          $(GFXINC) \
          $(FATFSINC) \
-         $(CHIBIOS)/os/various
+         $(CHIBIOS)/os/various \
+         $(CARSTATIONINC) 
 
 #
 # Project, sources and paths

@@ -18,7 +18,7 @@ bool_t InitSDCard(void)
 	bool_t		bRet;
 	FRESULT		err;
 
-	bRet = CH_FAILED;
+	bRet = FALSE;
 
 	/*
 	* Active SDC
@@ -31,12 +31,12 @@ bool_t InitSDCard(void)
 
 	  if (err != FR_OK)
 	  {
-		  bRet = CH_FAILED;
+		  bRet = FALSE;
 		  sdcDisconnect(&SDCD1);
 	  }
 	  else
 	  {
-		  bRet = CH_SUCCESS;
+		  bRet = TRUE;
 	  }
 	}
 

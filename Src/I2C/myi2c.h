@@ -12,6 +12,12 @@
 
 bool_t InitI2C(void);
 
+// 读取车内外温度和湿度，如果有变化就发送到主处理模块
+void GetTemperatureAndHumidity(void);
+
+// 读取光照传感器数据
+void GetLight(void);
+
 void cmd_light(BaseSequentialStream *chp, int argc, char *argv[]);
 
 #endif /* I2C_H_ */

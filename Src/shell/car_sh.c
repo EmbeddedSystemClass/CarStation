@@ -35,12 +35,12 @@ static const ShellConfig shell_cfg1 = {
 };
 
 // shell thread statck size
-#define SHELL_WA_SIZE   THD_WA_SIZE(512)
+static WORKING_AREA(waShell, 256);
 
 
 bool_t InitShell(void)
 {
-	bool_t		bRet 	= CH_SUCCESS;
+	bool_t		bRet 	= TRUE;
 	Thread *	shelltp = NULL;
 
 	/*
@@ -54,7 +54,7 @@ bool_t InitShell(void)
 	shellInit();
 
 	// 创建Shell线程
-	shelltp = shellCreate(&shell_cfg1, SHELL_WA_SIZE, NORMALPRIO);
+	shelltp = shellCreateStatic(&shell_cfg1, waShell, sizeof(waShell), NORMALPRIO);
 
 
 	return bRet;

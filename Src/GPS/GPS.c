@@ -11,6 +11,7 @@
 #include "GPS.h"
 #include <string.h>
 #include <stdio.h>
+#include "Msg/Msg.h"
 
 // GPS serial config(9600bps)
 static SerialConfig		GPSConfig =
@@ -63,7 +64,7 @@ bool_t InitGPS(void)
 {
 	bool_t	bRet;
 
-	bRet = CH_SUCCESS;
+	bRet = TRUE;
 
 	// 启动GPS处理线程
 	chThdCreateStatic(gpsThread, sizeof(gpsThread), NORMALPRIO, gps_Thread, NULL);
@@ -147,7 +148,7 @@ bool_t GPSCommandChecksum(int nLength)
 
 	// 判断计算结果
 	p++;		// 移动到最后两个字符前
-	//chsnprintf(Checksum, 3, "%02X", c);
+	chsnprintf(Checksum, 3, "%02X", c);
 
 	if ((Checksum[0] == *p++) && (Checksum[1] == *p))
 	{
@@ -169,6 +170,8 @@ bool_t processGPSCommand(int nLength)
 	}
 
 	// 判断$GP后的3个字符串
+	// switch
+
 	return false;
 }
 

@@ -7,26 +7,70 @@
 
 #include "GUI.h"
 
+// Mailbox定义
+#define GUI_MB_SIZE			10
+static void*	gui_mb_buffer[GUI_MB_SIZE];
+
+MAILBOX_DECL(gui_mb, gui_mb_buffer, GUI_MB_SIZE);
+
+// 函数定义
+
 // GUI工作线程
 static WORKING_AREA(guiThread, 256);
 __attribute__((noreturn))
 static msg_t gui_Thread(void *arg)
 {
+	(void)arg;
+	int		i;
+	msg_t	ret, msg;
+
 	// 初始化gfx
 	gfxInit();
 
-	// 循环处理消息
+	// 加载首页（根据配置）
+	// TODO:测试，默认加载main页面
+	LoadFirstPage(PAGE_MAIN);
+
+
+	// 循环处理Mailbox消息
 	while (true)
 	{
-		//
+		ret = chMBFetch(&gui_mb, &msg, MS2ST(100));
+
+		if (ret == RDY_OK)
+		{
+			// 过滤出特别的消息（例如：光照指数，用于调光）
+			// TODO
+
+			// 将消息转给各个block
+			SendMsgToPage(msg);
+
+			// 释放msg（msg实际是指向消息块的指针）
+			MSG_FREE((void*)msg);
+		}
+
+		// 做其他检查事务
+		// TODO
 	}
 	//chThdExit(0);
 }
 
+// 定义Msg的Memory Pool数据
+MEMORYPOOL_DECL(guiMP, sizeof(guiMem), NULL);
+static guiMem		guiMems[20];
+
 bool_t InitGUI(void)
 {
+	int		i;
+
+	// 初始化GUI使用的内存池
+	// chPoolInit(&guiMP, sizeof(guiMem), NULL);
+
+	chPoolLoadArray(&guiMP, guiMems, sizeof(guiMems)/sizeof(guiMems[0]));
+
 	//创建GUI线程，由GUI线程进行初始化和后续的工作
 	chThdCreateStatic(guiThread, sizeof(guiThread), NORMALPRIO, gui_Thread, NULL);
+
 	return true;
 }
 

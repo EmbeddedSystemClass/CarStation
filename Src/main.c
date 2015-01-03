@@ -22,6 +22,8 @@
 #include "shell/car_sh.h"
 #include "I2C/myi2c.h"
 #include "power/power.h"
+#include "UI/GUI.h"
+#include "main/controller.h"
 
 //#include "test.h"
 
@@ -79,9 +81,11 @@ int main(void) {
 	// 初始化I2C总线和相关设备
 	InitI2C();
 
+	// 初始化GUI（内部会创建GUI线程）
+	InitGUI();
 
+	// 进入controller主循环（不会再退出）
+	controller_entry();
 
-	while(TRUE) {
-		chThdSleepMilliseconds(250);
-	}
+	return 0;
 }
