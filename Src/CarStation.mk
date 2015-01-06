@@ -14,7 +14,8 @@ CARSTATIONSRC = ./Src/main.c \
 				./Src/UI/blocks/block_clock.c \
 				./Src/UI/blocks/block_gps.c \
 				./Src/UI/blocks/block_sh21.c \
-				./Src/SensorsThread/SensorsThread.c 
+				./Src/SensorsThread/SensorsThread.c \
+				./Src/RTC/myRTC.c 
 
 CARSTATIONINC = ./Src/include \
 				./Src

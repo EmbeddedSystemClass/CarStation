@@ -11,15 +11,19 @@
 
 #include <ch.h>
 
+// 消息ID，主处理线程和GUI处理线程，以及其他处理线程，共用一个消息枚举，消息内存也一起合并定义
 typedef enum
 {
-	MSG_CLOCK,
+	MSG_RTC_SECOND,
 	MSG_GPS,
 	MSG_SHT21_INSIDE,
 	MSG_SHT21_OUTSIDE,
 	MSG_POWER,
 	MSG_DOOR,
 	MSG_LIGHT,
+
+	// GUI
+	MSG_UI_CLOCK,
 } enumMsg;
 
 typedef union
@@ -53,6 +57,22 @@ typedef union
 	{
 		uint16_t	Light;
 	}	Light;
+
+	struct Msg_RTCSecond
+	{
+		uint32_t	time;
+	} RTCSecond;
+
+	struct Msg_UIClock
+	{
+		uint16_t	Year;
+		uint8_t		Month;
+		uint8_t		Day;
+
+		uint8_t		Hour;
+		uint8_t		Minute;
+	} UIClock;
+
 } Msg_Param;
 
 typedef struct
@@ -73,6 +93,9 @@ void InitMsgMemoryPool(void);
 
 #define MSG_SEND(p)		chMBPost(&main_mb, (msg_t)p, TIME_INFINITE)
 #define MSG_SEND_I(p)	chMBPostI(&main_mb, (msg_t)p)
+
+#define GUI_MSG_SEND(p)		chMBPost(&gui_mb, (msg_t)p, TIME_INFINITE)
+#define GUI_MSG_SEND_I(p)	chMBPostI(&gui_mb, (msg_t)p)
 
 // 每个mailbox外部定义
 extern Mailbox		gui_mb;

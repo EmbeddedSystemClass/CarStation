@@ -24,6 +24,7 @@
 #include "power/power.h"
 #include "UI/GUI.h"
 #include "main/controller.h"
+#include "RTC/myRTC.h"
 
 //#include "test.h"
 
@@ -83,6 +84,9 @@ int main(void) {
 
 	// 初始化GUI（内部会创建GUI线程）
 	InitGUI();
+
+	// 初始化RTC，每秒一个中断
+	InitRTC();
 
 	// 进入controller主循环（不会再退出）
 	controller_entry();

@@ -10,6 +10,8 @@
 #include "Msg/Msg.h"
 #include "const.h"
 
+#include <time.h>
+
 // Mailbox定义
 #define MAIN_MB_SIZE			20
 static void*	main_mb_buffer[MAIN_MB_SIZE];
@@ -17,6 +19,10 @@ static void*	main_mb_buffer[MAIN_MB_SIZE];
 MAILBOX_DECL(main_mb, main_mb_buffer, MAIN_MB_SIZE);
 
 // 所有的系统用的变量都存放在这里
+// RTC时间
+static uint32_t		s_RTC = 0;
+static uint32_t		s_LastMinute = 0;
+
 // 温度、湿度、气压
 static	int16_t		s_Temperature_in	= INVALID_TEMPERATURE;
 static int16_t		s_Humidity_in		= INVALID_HUMIDITY;
@@ -35,8 +41,48 @@ static uint16_t		s_Light				= 0;
 // 指南针、陀螺仪、加速计数据
 
 
-void MsgClock(Msg* msg)
+void MsgRTCSecond(Msg* msg)
 {
+	uint32_t		minute;
+
+	s_RTC = msg->Param.RTCSecond.time;
+
+	// 判断是否分钟发生变化，如果有变化，则通知UI刷新
+	minute = s_RTC / 60;
+	if (minute != s_LastMinute)
+	{
+		// 分配UI消息，发送UI消息
+		struct tm		now;
+		Msg*			msg;
+		msg_t			err;
+
+		localtime_r((time_t*)&(s_RTC), &now);
+
+		msg = MSG_NEW;
+		if (msg)
+		{
+			msg->Id = MSG_UI_CLOCK;
+			msg->Param.UIClock.Year 	= now.tm_year;
+			msg->Param.UIClock.Month 	= now.tm_mon;
+			msg->Param.UIClock.Day 		= now.tm_mday;
+			msg->Param.UIClock.Hour		= now.tm_hour;
+			msg->Param.UIClock.Minute 	= now.tm_min;
+
+			err = GUI_MSG_SEND(msg);
+
+			if (err == RDY_OK)
+			{
+				s_LastMinute = minute;
+			}
+			else
+			{
+				MSG_FREE(msg);
+			}
+		}
+	}
+
+	// 执行主定时器任务
+	// TODO
 }
 
 void MsgGPS(Msg* msg)
@@ -65,7 +111,7 @@ void MsgLight(Msg* msg)
 
 static struEntry	Entries[] =
 {
-	{MSG_CLOCK,				MsgClock},
+	{MSG_RTC_SECOND,		MsgRTCSecond},
 	{MSG_GPS,				MsgGPS},
 	{MSG_SHT21_INSIDE,		MsgSHT21inside},
 	{MSG_SHT21_OUTSIDE,		MsgSHT21outside},
