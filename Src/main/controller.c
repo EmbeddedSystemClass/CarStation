@@ -23,7 +23,7 @@ MAILBOX_DECL(main_mb, main_mb_buffer, MAIN_MB_SIZE);
 static uint32_t		s_RTC = 0;
 static uint32_t		s_LastMinute = 0;
 
-// 温度、湿度、气压
+// 温度（放大100倍）、湿度（放大100倍）、气压
 static	int16_t		s_Temperature_in	= INVALID_TEMPERATURE;
 static int16_t		s_Humidity_in		= INVALID_HUMIDITY;
 static int16_t		s_Temperature_out	= INVALID_TEMPERATURE;
@@ -89,8 +89,64 @@ void MsgGPS(Msg* msg)
 {
 }
 
-void MsgSHT21inside(Msg* msg)
+//#define HUMIDITY_CONVERT(h) (double)(-6.0 + (125 * (double)h) / 65536.0) * 100
+#define HUMIDITY_CONVERT(h) (-600 + 3125 * h / 16384)
+//#define TEMPERATURE_CONVERT(t) (double)(-46.85 + (double)(175.72 * (double)t) / 65536.0) * 100
+#define TEMPERATURE_CONVERT(t) (-4685 + (4393 * t) / 16384)
+
+void MsgSHT21(Msg* msg)
 {
+	int16_t		temperature, humidity;
+	int16_t		*c_pTemperature, *c_pHumidity;
+	enumMsg		UImsgId;
+
+	if (msg->Id == MSG_SHT21_INSIDE)
+	{
+		c_pTemperature 	= &s_Temperature_in;
+		c_pHumidity		= &s_Humidity_in;
+		UImsgId			= MSG_UI_TANDH_IN;
+	}
+	else if (msg->Id == MSG_SHT21_OUTSIDE)
+	{
+		c_pTemperature 	= &s_Temperature_out;
+		c_pHumidity 	= &s_Humidity_out;
+		UImsgId			= MSG_UI_TANDH_OUT;
+	}
+	else
+	{
+		return;
+	}
+
+	// 计算温度和湿度到正常值
+	temperature = (int16_t)TEMPERATURE_CONVERT(msg->Param.SHT21Data.Temperature);
+	humidity = (int16_t)HUMIDITY_CONVERT(msg->Param.SHT21Data.Humidity);
+
+	// 判断是否有变化
+	if ((temperature != *c_pTemperature) || (humidity != *c_pHumidity))
+	{
+		msg_t	err;
+		Msg*	msg;
+
+		msg = MSG_NEW;
+		if (msg)
+		{
+			msg->Id = UImsgId;
+			msg->Param.TandH.Temperature = temperature;
+			msg->Param.TandH.Humidity = humidity;
+
+			err = GUI_MSG_SEND(msg);
+			if (err)
+			{
+				s_Temperature_in = temperature;
+				s_Humidity_in = humidity;
+			}
+			else
+			{
+				MSG_FREE(msg);
+			}
+		}
+	}
+
 }
 
 void MsgSHT21outside(Msg* msg)
@@ -107,14 +163,40 @@ void MsgDoor(Msg* msg)
 
 void MsgLight(Msg* msg)
 {
+	uint16_t		light;
+
+	light = msg->Param.Light.Light;
+
+	if (s_Light != light)
+	{
+		msg_t		err;
+		Msg*		msg;
+
+		msg = MSG_NEW;
+		if (msg)
+		{
+			msg->Id = MSG_UI_LIGHT;
+			msg->Param.Light.Light = light;
+
+			err = GUI_MSG_SEND(msg);
+			if (err)
+			{
+				s_Light = light;
+			}
+			else
+			{
+				MSG_FREE(msg);
+			}
+		}
+	}
 }
 
 static struEntry	Entries[] =
 {
 	{MSG_RTC_SECOND,		MsgRTCSecond},
 	{MSG_GPS,				MsgGPS},
-	{MSG_SHT21_INSIDE,		MsgSHT21inside},
-	{MSG_SHT21_OUTSIDE,		MsgSHT21outside},
+	{MSG_SHT21_INSIDE,		MsgSHT21},
+	{MSG_SHT21_OUTSIDE,		MsgSHT21},
 	{MSG_POWER,				MsgPower},
 	{MSG_DOOR,				MsgDoor},
 	{MSG_LIGHT,				MsgLight},

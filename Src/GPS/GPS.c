@@ -99,7 +99,7 @@ static msg_t gps_Thread(void *arg) {
   chRegSetThreadName("gps");
 
   // test：开启GPS
-  EnableGPS(true);
+  //EnableGPS(true);
   gpsBufferPointer = gpsBuffer;
 
 

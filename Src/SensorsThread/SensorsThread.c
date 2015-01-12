@@ -8,6 +8,9 @@
 
 #include "SensorsThread.h"
 
+#include "I2C/myi2c.h"
+#include "power/power.h"
+
 
 static WORKING_AREA(sensorsThread, 128);
 static msg_t sensors_Thread(void *arg);
@@ -26,17 +29,21 @@ bool_t InitSensorsThread(void)
 
 static msg_t sensors_Thread(void *arg)
 {
+	(void)arg;
+
 	// 循环定时读取各个传感器，然后将变化的数据Post到主线程
 	while (TRUE)
 	{
-		// Read every 2 seconds
-		chThdSleepMilliseconds(2000);
+		// Read every 1 seconds
+		chThdSleepMilliseconds(1000);
 
 		// Power(12v/5v/battery/door status)
 
 		// SH21(temperature, humidity)(inside and outside)
+		GetTemperatureAndHumidity();
 
 		// BH1750 (light)
+		GetLight();
 
 		//
 	}

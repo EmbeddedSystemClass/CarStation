@@ -25,6 +25,8 @@
 #include "UI/GUI.h"
 #include "main/controller.h"
 #include "RTC/myRTC.h"
+#include "Msg/Msg.h"
+#include "Sensorsthread/SensorsThread.h"
 
 //#include "test.h"
 
@@ -73,6 +75,9 @@ int main(void) {
 	*/
 	chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
 
+	// 初始化消息内存池
+	InitMsgMemoryPool();
+
 	// 初始化GPS模块
 	InitGPS();
 
@@ -87,6 +92,9 @@ int main(void) {
 
 	// 初始化RTC，每秒一个中断
 	InitRTC();
+
+	// 启动传感器测量线程
+	InitSensorsThread();
 
 	// 进入controller主循环（不会再退出）
 	controller_entry();

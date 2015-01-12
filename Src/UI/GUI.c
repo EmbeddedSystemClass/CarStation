@@ -39,10 +39,10 @@ static msg_t gui_Thread(void *arg)
 
 		if (ret == RDY_OK)
 		{
-			// 过滤出特别的消息（例如：光照指数，用于调光）
+			// 过滤出特别的消息（例如：光照指数，用于调光；开关显示屏等）
 			// TODO
 
-			// 将消息转给各个block
+			// 将消息转给各个block处理
 			SendMsgToPage(msg);
 
 			// 释放msg（msg实际是指向消息块的指针）

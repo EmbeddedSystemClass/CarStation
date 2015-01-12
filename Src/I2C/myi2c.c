@@ -204,7 +204,7 @@ void GetTemperatureAndHumidity(void)
 	msg_t		err;
 
 	// inside
-	bRet = ReadSHT21(&I2CD1, &unTemperature, &unHumidity);
+	bRet = ReadSHT21(&I2CD2, &unTemperature, &unHumidity);
 	if (bRet)
 	{
 		// 判断是否有变化
@@ -236,7 +236,7 @@ void GetTemperatureAndHumidity(void)
 	}
 
 	// outside
-	bRet = ReadSHT21(&I2CD2, &unTemperature, &unHumidity);
+	bRet = ReadSHT21(&I2CD1, &unTemperature, &unHumidity);
 	if (bRet)
 	{
 		// 判断是否有变化
@@ -278,6 +278,8 @@ void GetTemperatureAndHumidity(void)
 // 读取照度计数值
 void cmd_light(BaseSequentialStream *chp, int argc, char *argv[])
 {
+	(void)argc;
+	(void)argv;
 	uint16_t		light = 0;
 
 

@@ -24,6 +24,9 @@ typedef enum
 
 	// GUI
 	MSG_UI_CLOCK,
+	MSG_UI_TANDH_IN,
+	MSG_UI_TANDH_OUT,
+	MSG_UI_LIGHT,
 } enumMsg;
 
 typedef union
@@ -63,6 +66,8 @@ typedef union
 		uint32_t	time;
 	} RTCSecond;
 
+	// 下面定义给UI使用的消息（UI和主处理模块也可能共用消息结构，共用部分在上面）
+	// 实时时钟消息（每分钟更新一次）
 	struct Msg_UIClock
 	{
 		uint16_t	Year;
@@ -72,6 +77,13 @@ typedef union
 		uint8_t		Hour;
 		uint8_t		Minute;
 	} UIClock;
+
+	// 温湿度实际数据，有变化时发送
+	struct Msg_TandH
+	{
+		int16_t		Temperature;
+		int16_t		Humidity;
+	} TandH;
 
 } Msg_Param;
 

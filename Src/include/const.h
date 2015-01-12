@@ -8,7 +8,7 @@
 #ifndef CONST_H_
 #define CONST_H_
 
-#define		INVALID_TEMPERATURE			(-1)
+#define		INVALID_TEMPERATURE			(-100)
 #define		INVALID_HUMIDITY			(-1)
 #define		INVALID_PRESSURE			(-1)
 
