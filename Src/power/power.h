@@ -12,6 +12,7 @@
 
 bool_t InitPower(void);
 void EnableCharge(bool_t bEnable);
+void GetPowerStatus(void);
 
 void cmd_power(BaseSequentialStream *chp, int argc, char *argv[]);
 void cmd_chargeenable(BaseSequentialStream *chp, int argc, char *argv[]);

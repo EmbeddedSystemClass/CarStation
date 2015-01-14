@@ -38,6 +38,7 @@ static msg_t sensors_Thread(void *arg)
 		chThdSleepMilliseconds(1000);
 
 		// Power(12v/5v/battery/door status)
+		GetPowerStatus();
 
 		// SH21(temperature, humidity)(inside and outside)
 		GetTemperatureAndHumidity();

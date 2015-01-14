@@ -10,7 +10,7 @@
 #include <chprintf.h>
 #include "Msg/Msg.h"
 
-#define ADC_GRP1_NUM_CHANNELS   1
+#define ADC_GRP1_NUM_CHANNELS   3
 #define ADC_GRP1_BUF_DEPTH      8
 
 static adcsample_t	voltages[ADC_GRP1_NUM_CHANNELS * ADC_GRP1_BUF_DEPTH];;
@@ -65,8 +65,46 @@ static const ADCConversionGroup adcgrpcfg1 = {
   0,                            /* SMPR2 */
   ADC_SQR1_NUM_CH(ADC_GRP1_NUM_CHANNELS),
   0,                            /* SQR2 */
-  ADC_SQR3_SQ1_N(ADC_CHANNEL_IN11)
+  ADC_SQR3_SQ1_N(ADC_CHANNEL_IN10 | ADC_CHANNEL_IN11 | ADC_CHANNEL_IN12)
 };
+
+// 测量电压数据，和充电状态，以及充电允许状态，发送给主处理模块
+// 在测量完成后，还对当前的电门和发电状态、电池电压状态，判断是否需要开启充电
+void GetPowerStatus(void)
+{
+	int16_t		Vbattery, Vcar12bat, Vcar12acc;
+	msg_t		err;
+
+	// 获取电压，并对8次采样取平均值
+	err = adcConvert(&ADCD1, &adcgrpcfg1, voltages, ADC_GRP1_BUF_DEPTH);
+
+	if (err == RDY_OK)
+	{
+		Msg*	msg;
+		int8_t	i;
+
+		// 取平均值
+		Vbattery = Vcar12bat = Vcar12acc = 0;
+		for (i = 0; i < ADC_GRP1_BUF_DEPTH; i++)
+		{
+			// 锂电池
+			Vbattery += voltages[i * ADC_GRP1_NUM_CHANNELS + 1];
+
+			// 汽车12V电池
+			Vcar12bat += voltages[i * ADC_GRP1_NUM_CHANNELS + 0];
+
+			// 汽车电门输出（主要用于判断是否开启电源）
+			Vcar12acc += voltages[i * ADC_GRP1_NUM_CHANNELS + 2];
+		}
+		Vbattery 	/= ADC_GRP1_BUF_DEPTH;
+		Vcar12bat	/= ADC_GRP1_BUF_DEPTH;
+		Vcar12acc	/= ADC_GRP1_BUF_DEPTH;
+
+		// 进行逻辑判断
+		//
+
+	}
+}
 
 void cmd_power(BaseSequentialStream *chp, int argc, char *argv[])
 {
