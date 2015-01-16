@@ -34,9 +34,10 @@ typedef union
 	//Power voltage
 	struct	Msg_Power
 	{
-		uint16_t	CarBattery;
-		uint16_t	LionBattery;
+		int16_t		CarBattery;
+		int16_t		LionBattery;
 		bool_t		IsPoweron;
+		bool_t		IsCarStart;
 		bool_t		IsCharging;
 	}	PowerVoltage;
 

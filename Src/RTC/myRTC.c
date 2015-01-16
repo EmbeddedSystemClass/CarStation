@@ -13,6 +13,7 @@ static void rtc_cb(RTCDriver *rtcp, rtcevent_t event)
 {
 	RTCTime		timespec;
 	Msg*		msg;
+	msg_t		err;
 
 	switch (event)
 	{
@@ -28,8 +29,13 @@ static void rtc_cb(RTCDriver *rtcp, rtcevent_t event)
 		{
 			msg->Id = MSG_RTC_SECOND;
 			msg->Param.RTCSecond.time = timespec.tv_sec;
-			MSG_SEND(msg);
+			err = MSG_SEND_I(msg);
+			if (err != RDY_OK)
+			{
+				MSG_FREE_I(msg);
+			}
 		}
+		chSysUnlockFromIsr();
 
 		// 触发Event，用于传感器测量线程定时工作，采集数据给出处理线程
 		// TODO
