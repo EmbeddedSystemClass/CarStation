@@ -35,8 +35,15 @@ static int16_t		s_Humidity_out		= INVALID_HUMIDITY;
 static uint16_t		s_Light				= 0;
 
 // 电源状态
+static int16_t		s_Battery			= INVALID_VOLTAGE;
+static int16_t		s_CarBat			= INVALID_VOLTAGE;
+static bool_t		s_IsFull			= false;
+static bool_t		s_IsCharging		= false;
+static bool_t		s_IsPowerOn			= false;
+static bool_t		s_IsCarStart		= false;
 
 // 门状态
+static bool_t		s_IsDoorOpen		= false;
 
 // 指南针、陀螺仪、加速计数据
 
@@ -53,22 +60,22 @@ void MsgRTCSecond(Msg* msg)
 	{
 		// 分配UI消息，发送UI消息
 		struct tm		now;
-		Msg*			msg;
+		Msg*			uimsg;
 		msg_t			err;
 
 		localtime_r((time_t*)&(s_RTC), &now);
 
-		msg = MSG_NEW;
-		if (msg)
+		uimsg = MSG_NEW;
+		if (uimsg)
 		{
-			msg->Id = MSG_UI_CLOCK;
-			msg->Param.UIClock.Year 	= now.tm_year;
-			msg->Param.UIClock.Month 	= now.tm_mon;
-			msg->Param.UIClock.Day 		= now.tm_mday;
-			msg->Param.UIClock.Hour		= now.tm_hour;
-			msg->Param.UIClock.Minute 	= now.tm_min;
+			uimsg->Id = MSG_UI_CLOCK;
+			uimsg->Param.UIClock.Year 	= now.tm_year;
+			uimsg->Param.UIClock.Month 	= now.tm_mon;
+			uimsg->Param.UIClock.Day 	= now.tm_mday;
+			uimsg->Param.UIClock.Hour	= now.tm_hour;
+			uimsg->Param.UIClock.Minute = now.tm_min;
 
-			err = GUI_MSG_SEND(msg);
+			err = GUI_MSG_SEND(uimsg);
 
 			if (err == RDY_OK)
 			{
@@ -76,7 +83,7 @@ void MsgRTCSecond(Msg* msg)
 			}
 			else
 			{
-				MSG_FREE(msg);
+				MSG_FREE(uimsg);
 			}
 		}
 	}
@@ -89,14 +96,9 @@ void MsgGPS(Msg* msg)
 {
 }
 
-//#define HUMIDITY_CONVERT(h) (double)(-6.0 + (125 * (double)h) / 65536.0) * 100
-#define HUMIDITY_CONVERT(h) (-600 + 3125 * h / 16384)
-//#define TEMPERATURE_CONVERT(t) (double)(-46.85 + (double)(175.72 * (double)t) / 65536.0) * 100
-#define TEMPERATURE_CONVERT(t) (-4685 + (4393 * t) / 16384)
 
 void MsgSHT21(Msg* msg)
 {
-	int16_t		temperature, humidity;
 	int16_t		*c_pTemperature, *c_pHumidity;
 	enumMsg		UImsgId;
 
@@ -117,40 +119,32 @@ void MsgSHT21(Msg* msg)
 		return;
 	}
 
-	// 计算温度和湿度到正常值
-	temperature = (int16_t)TEMPERATURE_CONVERT(msg->Param.SHT21Data.Temperature);
-	humidity = (int16_t)HUMIDITY_CONVERT(msg->Param.SHT21Data.Humidity);
-
 	// 判断是否有变化
-	if ((temperature != *c_pTemperature) || (humidity != *c_pHumidity))
+	if ((msg->Param.SHT21Data.Temperature != *c_pTemperature) || (msg->Param.SHT21Data.Humidity != *c_pHumidity))
 	{
 		msg_t	err;
-		Msg*	msg;
+		Msg*	uimsg;
 
-		msg = MSG_NEW;
-		if (msg)
+		uimsg = MSG_NEW;
+		if (uimsg)
 		{
-			msg->Id = UImsgId;
-			msg->Param.TandH.Temperature = temperature;
-			msg->Param.TandH.Humidity = humidity;
+			uimsg->Id = UImsgId;
+			uimsg->Param.TandH.Temperature 	= msg->Param.SHT21Data.Temperature;
+			uimsg->Param.TandH.Humidity 	= msg->Param.SHT21Data.Humidity;
 
-			err = GUI_MSG_SEND(msg);
-			if (err)
+			err = GUI_MSG_SEND(uimsg);
+			if (err == RDY_OK)
 			{
-				s_Temperature_in = temperature;
-				s_Humidity_in = humidity;
+				*c_pTemperature = msg->Param.SHT21Data.Temperature;
+				*c_pHumidity = msg->Param.SHT21Data.Humidity;
 			}
 			else
 			{
-				MSG_FREE(msg);
+				MSG_FREE(uimsg);
 			}
 		}
 	}
 
-}
-
-void MsgSHT21outside(Msg* msg)
-{
 }
 
 void MsgPower(Msg* msg)
@@ -170,22 +164,22 @@ void MsgLight(Msg* msg)
 	if (s_Light != light)
 	{
 		msg_t		err;
-		Msg*		msg;
+		Msg*		uimsg;
 
-		msg = MSG_NEW;
-		if (msg)
+		uimsg = MSG_NEW;
+		if (uimsg)
 		{
-			msg->Id = MSG_UI_LIGHT;
-			msg->Param.Light.Light = light;
+			uimsg->Id = MSG_UI_LIGHT;
+			uimsg->Param.Light.Light = light;
 
-			err = GUI_MSG_SEND(msg);
-			if (err)
+			err = GUI_MSG_SEND(uimsg);
+			if (err == RDY_OK)
 			{
 				s_Light = light;
 			}
 			else
 			{
-				MSG_FREE(msg);
+				MSG_FREE(uimsg);
 			}
 		}
 	}

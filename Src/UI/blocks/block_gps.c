@@ -15,7 +15,7 @@ static void gps_unload(void)
 {
 }
 
-static void gps_msg(msg_t msg)
+static void gps_msg(Msg* msg)
 {
 }
 

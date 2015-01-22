@@ -15,7 +15,7 @@ static void sh21_unload(void)
 {
 }
 
-static void sh21_msg(msg_t msg)
+static void sh21_msg(Msg* msg)
 {
 }
 

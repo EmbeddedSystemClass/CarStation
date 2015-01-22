@@ -8,6 +8,8 @@
 #include "myRTC.h"
 #include <hal.h>
 #include <Msg/Msg.h>
+#include <time.h>
+#include <chprintf.h>
 
 static void rtc_cb(RTCDriver *rtcp, rtcevent_t event)
 {
@@ -54,5 +56,39 @@ bool_t InitRTC(void)
 	return true;
 }
 
+// 设置时间，获取时间（没有参数时）
+void cmd_time(BaseSequentialStream *chp, int argc, char *argv[])
+{
+	RTCTime		timespec;
+	struct tm	now;
+
+	if (argc == 0)
+	{
+		// 获取时间
+		rtcGetTime(&RTCD1, &timespec);
+		localtime_r((time_t*)&timespec.tv_sec, &now);
+
+		chprintf(chp, "time %d %d %d %d %d %d\r\n",
+				now.tm_year + 1900,
+				now.tm_mon + 1,
+				now.tm_mday,
+				now.tm_hour,
+				now.tm_min,
+				now.tm_sec);
+
+		return;
+	}
+	else
+	{
+		// 设置时间（需要年、月、日、时、分，5个必须参数，秒可选）
+		if ((argc != 5) || (argc != 6))
+		{
+			// usage
+			chprintf(chp, "time yyyy mm dd hh mm [ss]\r\n");
+			return;
+		}
+
+	}
+}
 
 

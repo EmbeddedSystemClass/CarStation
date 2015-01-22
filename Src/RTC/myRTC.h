@@ -12,5 +12,7 @@
 
 bool_t	InitRTC(void);
 
+void cmd_time(BaseSequentialStream *chp, int argc, char *argv[]);
+
 
 #endif /* MYRTC_H_ */

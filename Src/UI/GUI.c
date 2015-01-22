@@ -21,7 +21,6 @@ __attribute__((noreturn))
 static msg_t gui_Thread(void *arg)
 {
 	(void)arg;
-	int		i;
 	msg_t	ret, msg;
 
 	// 初始化gfx
@@ -43,7 +42,7 @@ static msg_t gui_Thread(void *arg)
 			// TODO
 
 			// 将消息转给各个block处理
-			SendMsgToPage(msg);
+			SendMsgToPage((Msg*)msg);
 
 			// 释放msg（msg实际是指向消息块的指针）
 			MSG_FREE((void*)msg);
@@ -55,19 +54,9 @@ static msg_t gui_Thread(void *arg)
 	//chThdExit(0);
 }
 
-// 定义Msg的Memory Pool数据
-MEMORYPOOL_DECL(guiMP, sizeof(guiMem), NULL);
-static guiMem		guiMems[20];
 
 bool_t InitGUI(void)
 {
-	int		i;
-
-	// 初始化GUI使用的内存池
-	// chPoolInit(&guiMP, sizeof(guiMem), NULL);
-
-	chPoolLoadArray(&guiMP, guiMems, sizeof(guiMems)/sizeof(guiMems[0]));
-
 	//创建GUI线程，由GUI线程进行初始化和后续的工作
 	chThdCreateStatic(guiThread, sizeof(guiThread), NORMALPRIO, gui_Thread, NULL);
 

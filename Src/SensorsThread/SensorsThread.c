@@ -12,7 +12,7 @@
 #include "power/power.h"
 
 
-static WORKING_AREA(sensorsThread, 128);
+static WORKING_AREA(sensorsThread, 256);
 static msg_t sensors_Thread(void *arg);
 
 bool_t InitSensorsThread(void)

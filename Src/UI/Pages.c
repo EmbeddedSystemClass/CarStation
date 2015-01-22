@@ -112,7 +112,7 @@ void UnloadPage(const struPage* page)
 }
 
 // 将消息发送给当前正在显示的页面的每个模块
-void SendMsgToPage(msg_t msg)
+void SendMsgToPage(Msg* msg)
 {
 	int					i;
 	MsgFunc_t			msgFunc;

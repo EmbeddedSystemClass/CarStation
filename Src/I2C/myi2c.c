@@ -14,14 +14,14 @@
 static const I2CConfig i2cfg1 = {
     OPMODE_I2C,
     100000,
-    FAST_DUTY_CYCLE_2,
+    STD_DUTY_CYCLE,
 };
 
 /* I2C1 */
 static const I2CConfig i2cfg2 = {
     OPMODE_I2C,
     100000,
-    FAST_DUTY_CYCLE_2,
+    STD_DUTY_CYCLE,
 };
 
 // I2C设备地址
@@ -195,6 +195,11 @@ bool_t ReadSHT21(I2CDriver* i2cp, uint16_t* pTemperature, uint16_t* pHumidity)
 	return bRet;
 }
 
+//#define HUMIDITY_CONVERT(h) (double)(-6.0 + (125 * (double)h) / 65536.0) * 100
+#define HUMIDITY_CONVERT(h) (-600 + 3125 * h / 16384)
+//#define TEMPERATURE_CONVERT(t) (double)(-46.85 + (double)(175.72 * (double)t) / 65536.0) * 100
+#define TEMPERATURE_CONVERT(t) (-4685 + (4393 * t) / 16384)
+
 // Last
 void GetTemperatureAndHumidity(void)
 {
@@ -215,8 +220,8 @@ void GetTemperatureAndHumidity(void)
 			if (msg)
 			{
 				msg->Id = MSG_SHT21_INSIDE;
-				msg->Param.SHT21Data.Temperature = unTemperature;
-				msg->Param.SHT21Data.Humidity = unHumidity;
+				msg->Param.SHT21Data.Temperature = (int16_t)TEMPERATURE_CONVERT(unTemperature);
+				msg->Param.SHT21Data.Humidity = (int16_t)HUMIDITY_CONVERT(unHumidity);
 
 				// Send
 				err = MSG_SEND(msg);

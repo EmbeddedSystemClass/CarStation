@@ -19,19 +19,20 @@ static adcsample_t	voltages[ADC_GRP1_NUM_CHANNELS * ADC_GRP1_BUF_DEPTH];
 // 缓存电压值（为判断方便，这里将电压数据换算完成）
 static int16_t		c_Battery		= INVALID_VOLTAGE;	// 1/2取样
 static int16_t		c_CarBattery	= INVALID_VOLTAGE;	// 1/5取样
-static int16_t		c_CarAcc		= INVALID_VOLTAGE;	// 1/5取样
+//static int16_t		c_CarAcc		= INVALID_VOLTAGE;	// 1/5取样
 
 static bool_t		c_PowerOn		= false;
 static bool_t		c_CarRunning	= false;
-
 static bool_t		s_PowerIsChange	= false;
+static bool_t		c_IsFull		= false;
 
 #define ADC_REF_VOLTAGE			3300		// ADC参考电压
-#define POWER_ON_VAL			9000		// 大于9v，就认为开启电源
-#define CAR_RUNNING_VAL			1270		// 大于12.7v，认为启动，发电机工作
+#define POWER_ON_VAL			5000		// 大于5v，就认为开启电源（有可能启动时，电池电压会跌倒很低）
+#define CAR_RUNNING_VAL			13000		// 大于xx.x，认为启动，发电机工作
+#define BAT_TOO_LOW				3400		// 锂电池低压，需要启动充电
 
 
-void PowerCheck(void);
+void PowerCheck(int16_t bat, int16_t carBat, int16_t	carAcc);
 
 bool_t InitPower(void)
 {
@@ -128,15 +129,7 @@ void GetPowerStatus(void)
 		vtemp = 5 * ADC_REF_VOLTAGE * (int32_t)Vcar12acc / 4096;
 		Vcar12acc = (int16_t)vtemp;
 
-		if ( (Vbattery != c_Battery) || (Vcar12bat != c_CarBattery) || (Vcar12acc != c_CarAcc) )
-		{
-			s_PowerIsChange = true;
-			c_Battery = Vbattery;
-			c_CarBattery = Vcar12bat;
-			c_CarAcc = Vcar12acc;
-
-			PowerCheck();
-		}
+		PowerCheck(Vbattery, Vcar12bat, Vcar12acc);
 
 		if (s_PowerIsChange)
 		{
@@ -150,6 +143,7 @@ void GetPowerStatus(void)
 				msg->Param.PowerVoltage.IsPoweron	= c_PowerOn;
 				msg->Param.PowerVoltage.IsCarStart	= c_CarRunning;
 				msg->Param.PowerVoltage.IsCharging	= palReadPad(GPIO_DCDC_ENABLE_PORT, GPIO_DCDC_ENABLE_BIT);
+				msg->Param.PowerVoltage.IsFull		= c_IsFull;
 
 				err = MSG_SEND(msg);
 				if (err == RDY_OK)
@@ -167,9 +161,64 @@ void GetPowerStatus(void)
 	}
 }
 
-void PowerCheck(void)
+void PowerCheck(int16_t bat, int16_t carBat, int16_t	carAcc)
 {
+	bool_t		isFull;
+	bool_t		powerOn;
+	bool_t		carRunning;
+
 	// 检查是否应该启动充电，是否汽车开启电源，是否汽车启动了
+	powerOn 	= (carAcc >= POWER_ON_VAL);
+	carRunning 	= (carBat >= CAR_RUNNING_VAL) && powerOn;
+
+	isFull = palReadPad(GPIO_CHARGE_FULL_PORT, GPIO_CHARGE_FULL_BIT) ? true : false;
+	if (isFull != c_IsFull)
+	{
+		s_PowerIsChange = true;
+		c_IsFull = isFull;
+	}
+
+	// 锂电池电压太低，需要启动充电
+	if (bat <= BAT_TOO_LOW)
+	{
+		// 启动充电
+		EnableCharge(true);
+		s_PowerIsChange = true;
+	}
+
+	if (c_IsFull && !carRunning)
+	{
+		// 充满电，但是汽车没有启动，则关闭充电
+		EnableCharge(false);
+		s_PowerIsChange = true;
+	}
+
+	// 汽车启动状态变化
+	if (carRunning != c_CarRunning)
+	{
+		if (carRunning)
+		{
+			// 汽车发动后，就启动充电
+			EnableCharge(true);
+		}
+		else
+		{
+			// 汽车发动机停止（或者发电的电压太低），停止充电
+			EnableCharge(false);
+		}
+		s_PowerIsChange = true;
+		c_CarRunning = carRunning;
+	}
+
+	// 判断电压值是否变化，Poweron是否变化
+	if ((c_PowerOn != powerOn) || (c_Battery != bat) || (c_CarBattery != carBat) )
+	{
+		c_PowerOn = powerOn;
+		c_Battery = bat;
+		c_CarBattery = carBat;
+
+		s_PowerIsChange = true;
+	}
 }
 
 void cmd_power(BaseSequentialStream *chp, int argc, char *argv[])
@@ -181,12 +230,16 @@ void cmd_power(BaseSequentialStream *chp, int argc, char *argv[])
 	adcConvert(&ADCD1, &adcgrpcfg1, voltages, ADC_GRP1_BUF_DEPTH);
 
 	// 输出电压值
+	chprintf(chp, "Lion Battery: %dmv\r\n", c_Battery);
+	chprintf(chp, "Car  Battery: %dmv\r\n", c_CarBattery);
+
+	chprintf(chp, "Car %s, %s\r\n", c_PowerOn ? "on" : "off", c_CarRunning ? "running" : "stop");
 
 	// 当前充电允许状态
-	chprintf(chp, "Enable charge:%d\r\n", palReadPad(GPIO_DCDC_ENABLE_PORT, GPIO_DCDC_ENABLE_BIT));
+	chprintf(chp, "Enable charge:%s\r\n", palReadPad(GPIO_DCDC_ENABLE_PORT, GPIO_DCDC_ENABLE_BIT) ? "true" : "false");
 
 	// 当前锂电池充电模块的充满指示状态
-	chprintf(chp, "Is Full:%d\r\n", palReadPad(GPIO_CHARGE_FULL_PORT, GPIO_CHARGE_FULL_BIT));
+	chprintf(chp, "Is Full:%s\r\n", c_IsFull ? "true" : "false");
 }
 
 void cmd_chargeenable(BaseSequentialStream *chp, int argc, char *argv[])

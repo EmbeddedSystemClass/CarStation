@@ -41,7 +41,7 @@ typedef struct
 // GUI block的各个入口函数
 typedef void (*LoadFunc_t)(const struSize* size, void* param);	//param：用于初始化相同块的不同风格（可能有字体不同，大小不同，显示的信息页可能不同）
 typedef void (*UnloadFunc_t)(void);
-typedef void (*MsgFunc_t)(msg_t msg);
+typedef void (*MsgFunc_t)(Msg* msg);
 
 typedef enumAction (*ButtonFunc_t)(enumButtonPress button);
 
@@ -96,21 +96,13 @@ typedef union
 	}	SH21Data;
 } guiMem;
 
-extern MemoryPool		guiMP;
-
-// GUI内存分配宏
-#define GUI_NEW			chPoolAlloc(&guiMP)
-#define GUI_NEW_I		chPoolAllocI(&guiMP)
-
-#define GUI_FREE(p)		chPoolFree(&guiMP, p)
-#define GUI_FREE_I(p)	chPoolFreeI(&guiMP, p)
 
 bool_t InitGUI(void);
 
 void LoadFirstPage(enumPage name);
 void LoadPage(const struPage* page);
 void UnloadPage(const struPage* page);
-void SendMsgToPage(msg_t msg);
+void SendMsgToPage(Msg* msg);
 
 
 // 发送消息到GUI Mailbox

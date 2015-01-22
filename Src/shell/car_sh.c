@@ -14,6 +14,7 @@
 #include "../LED/led.h"
 #include "../GPS/GPs.h"
 #include "../I2C/myi2c.h"
+#include "../RTC/myRTC.h"
 
 // 自定义命令入口
 static const ShellCommand commands[] = {
@@ -26,6 +27,7 @@ static const ShellCommand commands[] = {
 	{"led", cmd_led},
 	{"gpsenable", cmd_gpsenable},
 	{"light", cmd_light},
+	{"time", cmd_time},
 	{NULL, NULL}
 };
 
@@ -35,7 +37,7 @@ static const ShellConfig shell_cfg1 = {
 };
 
 // shell thread statck size
-static WORKING_AREA(waShell, 256);
+static WORKING_AREA(waShell, 512);
 
 
 bool_t InitShell(void)

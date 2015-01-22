@@ -142,7 +142,7 @@
  * PC12- SDC(D3)
  */
 #define VAL_GPIOCCRL            0x33334000      /*  PC7...PC0 */
-#define VAL_GPIOCCRH            0x444BBBBB      /* PC15...PC8 */
+#define VAL_GPIOCCRH            0x888BBBBB      /* PC15...PC8 */
 #define VAL_GPIOCODR            0xFFFFFFFF
 
 /*

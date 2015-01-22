@@ -39,6 +39,7 @@ typedef union
 		bool_t		IsPoweron;
 		bool_t		IsCarStart;
 		bool_t		IsCharging;
+		bool_t		IsFull;
 	}	PowerVoltage;
 
 	struct Msg_DoorOpen
@@ -49,8 +50,8 @@ typedef union
 	// 温度和湿度
 	struct Msg_SHT21
 	{
-		uint16_t	Temperature;
-		uint16_t	Humidity;
+		int16_t		Temperature;
+		int16_t		Humidity;
 	}	SHT21Data;
 
 	struct Msg_GPS_Pos
