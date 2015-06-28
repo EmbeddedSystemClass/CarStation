@@ -149,6 +149,26 @@ void MsgSHT21(Msg* msg)
 
 void MsgPower(Msg* msg)
 {
+	msg_t		err;
+	Msg*		uimsg;
+
+	if (msg->Param.PowerVoltage.IsPoweron != s_IsPowerOn)
+	{
+		s_IsPowerOn = msg->Param.PowerVoltage.IsPoweron;
+
+		uimsg = MSG_NEW;
+		if (uimsg)
+		{
+			uimsg->Id = MSG_UI_ONOFF;
+			uimsg->Param.DisplayOnOff.IsOn = s_IsPowerOn;
+
+			err = GUI_MSG_SEND(uimsg);
+			if (err != RDY_OK)
+			{
+				MSG_FREE(uimsg);
+			}
+		}
+	}
 }
 
 void MsgDoor(Msg* msg)

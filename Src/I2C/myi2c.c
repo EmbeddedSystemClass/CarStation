@@ -13,15 +13,15 @@
 /* I2C1 */
 static const I2CConfig i2cfg1 = {
     OPMODE_I2C,
-    100000,
-    STD_DUTY_CYCLE,
+    400000,
+    FAST_DUTY_CYCLE_2,
 };
 
 /* I2C1 */
 static const I2CConfig i2cfg2 = {
     OPMODE_I2C,
-    100000,
-    STD_DUTY_CYCLE,
+    400000,
+    FAST_DUTY_CYCLE_2,
 };
 
 // I2C设备地址
@@ -142,6 +142,27 @@ void GetLight(void)
 	}
 }
 
+uint8_t SHT21Checksum(uint8_t* pData, uint8_t length)
+{
+	// 计算SHT21的校验字
+	uint8_t crc = 0;
+	uint8_t byteCtr, bit;
+
+	//calculates 8-Bit checksum with given polynomial
+	for (byteCtr = 0; byteCtr < length; ++byteCtr)
+	{
+		crc ^= (pData[byteCtr]);
+		for (bit = 8; bit > 0; --bit)
+		{
+			if (crc & 0x80)
+				crc = (crc << 1) ^ 0x31;
+			else
+				crc = (crc << 1);
+		}
+	}
+
+	return crc;
+}
 
 // 读取温湿度数据
 bool_t ReadSHT21(I2CDriver* i2cp, uint16_t* pTemperature, uint16_t* pHumidity)
@@ -149,44 +170,91 @@ bool_t ReadSHT21(I2CDriver* i2cp, uint16_t* pTemperature, uint16_t* pHumidity)
 	bool_t		bRet = false;
 	msg_t 		status 	= RDY_OK;
 	uint8_t		data[3];
+	uint8_t		i;
 
 	i2cAcquireBus(i2cp);
 	do
 	{
 		// 阻塞方式测量温度
-		data[0] = 0xE3;
+//		data[0] = 0xE3;
+//		status = i2cMasterTransmitTimeout(i2cp, SHT21_I2C_ADDR, data, 1, data, 3, MS2ST(200));
+//		if (status != RDY_OK)
+//		{
+//			break;
+//		}
+		data[0] = 0xF3;
 		status = i2cMasterTransmitTimeout(i2cp, SHT21_I2C_ADDR, data, 1, NULL, 0, MS2ST(10));
 		if (status != RDY_OK)
 		{
 			break;
 		}
-		// 直接读取，在读取时会根据测量时间阻塞
-		status = i2cMasterReceiveTimeout(i2cp, SHT21_I2C_ADDR, data, 3, MS2ST(100));
+
+		chThdSleepMilliseconds(100);
+
+		for (i = 0; i < 10; i++)
+		{
+			status = i2cMasterReceiveTimeout(i2cp, SHT21_I2C_ADDR, data, 3, MS2ST(10));
+
+			if (status == RDY_OK)
+			{
+				break;
+			}
+		}
+
 		if (status != RDY_OK)
 		{
 			break;
 		}
 
 		// Check CRC
+		if (data[2] != SHT21Checksum(data, 2))
+		{
+			break;
+		}
 
-		*pTemperature = *(uint16_t*)data;
+		*pTemperature = data[0];
+		*pTemperature = (*pTemperature << 8) + data[1];
 
 		// 阻塞方式测量湿度
-		data[0] = 0xE5;
+//		data[0] = 0xE5;
+//		status = i2cMasterTransmitTimeout(i2cp, SHT21_I2C_ADDR, data, 1, data, 3, MS2ST(200));
+//		if (status != RDY_OK)
+//		{
+//			break;
+//		}
+
+		data[0] = 0xF5;
 		status = i2cMasterTransmitTimeout(i2cp, SHT21_I2C_ADDR, data, 1, NULL, 0, MS2ST(10));
 		if (status != RDY_OK)
 		{
 			break;
 		}
-		status = i2cMasterReceiveTimeout(i2cp, SHT21_I2C_ADDR, data, 3, MS2ST(100));
+
+		chThdSleepMilliseconds(30);
+
+		for (i = 0; i < 10; i++)
+		{
+			status = i2cMasterReceiveTimeout(i2cp, SHT21_I2C_ADDR, data, 3, MS2ST(10));
+
+			if (status == RDY_OK)
+			{
+				break;
+			}
+		}
+
 		if (status != RDY_OK)
 		{
 			break;
 		}
 
 		// check CRC
+		if (data[2] != SHT21Checksum(data, 2))
+		{
+			break;
+		}
 
-		*pHumidity = *(uint16_t*)data;
+		*pHumidity = data[0];
+		*pHumidity = (*pHumidity << 8) + data[1];
 
 		bRet = true;
 	} while (0);
@@ -251,8 +319,8 @@ void GetTemperatureAndHumidity(void)
 			if (msg)
 			{
 				msg->Id = MSG_SHT21_OUTSIDE;
-				msg->Param.SHT21Data.Temperature = unTemperature;
-				msg->Param.SHT21Data.Humidity = unHumidity;
+				msg->Param.SHT21Data.Temperature = (int16_t)TEMPERATURE_CONVERT(unTemperature);
+				msg->Param.SHT21Data.Humidity = (int16_t)HUMIDITY_CONVERT(unHumidity);
 
 				err = MSG_SEND(msg);
 				if (err == RDY_OK)

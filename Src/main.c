@@ -41,9 +41,9 @@ static msg_t Thread1(void *arg) {
   chRegSetThreadName("blinker");
   while (TRUE) {
     palClearPad(GPIO_LED_INTERNAL_PORT, GPIO_LED_INTERNAL_BIT);
-    chThdSleepMilliseconds(500);
+    chThdSleepMilliseconds(900);
     palSetPad(GPIO_LED_INTERNAL_PORT, GPIO_LED_INTERNAL_BIT);
-    chThdSleepMilliseconds(500);
+    chThdSleepMilliseconds(100);
   }
 }
 
@@ -101,3 +101,55 @@ int main(void) {
 
 	return 0;
 }
+
+
+void NMIVector(void)
+{
+	while (TRUE);
+}
+void HardFaultVector(void)
+{
+	while (TRUE);
+}
+void MemManageVector(void)
+{
+	while (TRUE);
+}
+void BusFaultVector(void)
+{
+	while (TRUE);
+}
+void UsageFaultVector(void)
+{
+	while (TRUE);
+}
+void Vector1C(void)
+{
+	while (TRUE);
+}
+void Vector20(void)
+{
+	while (TRUE);
+}
+void Vector24(void)
+{
+	while (TRUE);
+}
+void Vector28(void)
+{
+	while (TRUE);
+}
+void DebugMonitorVector(void)
+{
+	while (TRUE);
+}
+void Vector34(void)
+{
+	while (TRUE);
+}
+void PendSVVector(void)
+{
+	while (TRUE);
+}
+
+

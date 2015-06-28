@@ -16,7 +16,7 @@ MAILBOX_DECL(gui_mb, gui_mb_buffer, GUI_MB_SIZE);
 // 函数定义
 
 // GUI工作线程
-static WORKING_AREA(guiThread, 256);
+static WORKING_AREA(guiThread, 512);
 __attribute__((noreturn))
 static msg_t gui_Thread(void *arg)
 {
@@ -25,6 +25,9 @@ static msg_t gui_Thread(void *arg)
 
 	// 初始化gfx
 	gfxInit();
+
+	// 设置初始的对比度（亮度）
+	gdispSetContrast(40);
 
 	// 加载首页（根据配置）
 	// TODO:测试，默认加载main页面

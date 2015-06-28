@@ -22,5 +22,8 @@ typedef struct
 // 所有block的函数、全局变量定义都在这里定义
 extern const struBlockFunctions	block_clock;
 extern const struBlockFunctions	block_gps;
+extern const struBlockFunctions	block_sh21;
+extern const struBlockFunctions	block_control;
+extern const struBlockFunctions	block_test;
 
 #endif /* BLOCK_H_ */

@@ -121,8 +121,8 @@
  * PB14- 蓝牙配对LED（input）
  */
 #define VAL_GPIOBCRL            0xFF444444      /*  PB7...PB0 */
-#define VAL_GPIOBCRH            0x4444FF44      /* PB15...PB8 */
-#define VAL_GPIOBODR            0xFFFFFFFF
+#define VAL_GPIOBCRH            0x4444FF48      /* PB15...PB8 */
+#define VAL_GPIOBODR            0xFFFFFEFF
 
 /*
  * Port C setup.

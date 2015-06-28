@@ -8,13 +8,16 @@
 #include "block.h"
 #include <chprintf.h>
 
+static struSize		s_Pos;
+
 static void clock_load(const struSize* size, void* param)
 {
+	(void)param;
 	// TODO:测试代码
 	//gdispSetClip(size->x, size->y, size->cx, size->cy);
 
-	gdispDrawBox(0, 0, size->cx, size->cy, 1);
-	//gdispDrawLine(0, 0, size->cx, size->cy, 1);
+	// 保持位置和大小
+	s_Pos = *size;
 }
 
 static void clock_unload(void)
@@ -29,13 +32,12 @@ static void clock_msg(Msg* msg)
 		char		ctime[6];
 
 		// Clear
-		gdispFillArea(0, 0, 128, 32, 0);
+		gdispFillArea(0, 10, 128, 22, 0);
 
 		chsnprintf(ctime, 6, "%02d:%02d", msg->Param.UIClock.Hour, msg->Param.UIClock.Minute);
 		font = gdispOpenFont("LargeNumbers");
 		gdispDrawString(0, 10, ctime, font, 1);
 		gdispCloseFont(font);
-		gdispFlush();
 	}
 }
 

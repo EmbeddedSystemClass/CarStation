@@ -27,6 +27,9 @@ typedef enum
 	MSG_UI_TANDH_IN,
 	MSG_UI_TANDH_OUT,
 	MSG_UI_LIGHT,
+
+	MSG_UI_ONOFF,
+	MSG_UI_CONTRAST,
 } enumMsg;
 
 typedef union
@@ -86,6 +89,17 @@ typedef union
 		int16_t		Temperature;
 		int16_t		Humidity;
 	} TandH;
+
+	// 液晶屏控制消息
+	struct Msg_DisplayOnOff
+	{
+		bool_t		IsOn;
+	} DisplayOnOff;
+
+	struct Msg_DisplayContrast
+	{
+		uint8_t		Contrast;
+	} DisplayContrast;
 
 } Msg_Param;
 

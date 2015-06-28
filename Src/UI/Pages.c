@@ -20,8 +20,10 @@ static uint8_t		s_PagePos;
 // 主页
 static const struBlock		mainPage[] =
 {
+	{{0, 0, 0, 0}, &block_control, NULL},
 	{{0, 9, 128, 32}, &block_clock, NULL},
-	{{0,42, 128, 16}, &block_gps, NULL}
+	{{0,42, 128, 16}, &block_sh21, NULL},
+	{{0,0, 128, 8}, &block_test, NULL}
 };
 
 
